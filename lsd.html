@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generador de Imágenes Psicodélicas Seguras</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #222;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .container {
+      padding: 20px;
+    }
+    canvas {
+      border: 2px solid #fff;
+      margin-top: 20px;
+      background-color: #222;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+      border: none;
+      background-color: #555;
+      color: #fff;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Generador de Imágenes Psicodélicas Seguras</h1>
+    <p>Este generador crea imágenes con efectos psicodélicos pensados para ser seguros para personas con epilepsia.</p>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <br>
+    <button id="generateBtn">Generar Imagen</button>
+  </div>
+
+  <script>
+    // Función para obtener un número aleatorio entre min y max
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    // Función para generar un color pastel aleatorio utilizando HSL.
+    // Los colores pastel suelen tener baja saturación y alta luminosidad.
+    function randomPastelColor() {
+      const hue = Math.floor(random(0, 360));
+      const saturation = Math.floor(random(40, 70)); // Saturación moderada
+      const lightness = Math.floor(random(75, 90));  // Alto brillo para tonos pastel
+      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    }
+
+    // Función que genera una imagen “psicodélica” de forma estática.
+    // Al ser imágenes estáticas se evita el parpadeo y se minimiza el riesgo de provocar crisis.
+    function generatePsychedelicImage() {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Limpiar el canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#222';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Dibujar varias figuras con gradientes suaves
+      const numFigures = 8;
+      for (let i = 0; i < numFigures; i++) {
+        // Posición y tamaño aleatorios
+        const x = random(0, canvas.width);
+        const y = random(0, canvas.height);
+        const maxRadius = Math.min(canvas.width, canvas.height) / 4;
+        const radius = random(50, maxRadius);
+        
+        // Crear un gradiente radial para un efecto suave
+        const gradient = ctx.createRadialGradient(x, y, radius * 0.1, x, y, radius);
+        gradient.addColorStop(0, randomPastelColor());
+        gradient.addColorStop(1, randomPastelColor());
+        
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+      
+      // Dibujar algunas curvas suaves adicionales
+      const numCurves = 5;
+      for (let i = 0; i < numCurves; i++) {
+        ctx.beginPath();
+        ctx.moveTo(random(0, canvas.width), random(0, canvas.height));
+        ctx.bezierCurveTo(
+          random(0, canvas.width), random(0, canvas.height),
+          random(0, canvas.width), random(0, canvas.height),
+          random(0, canvas.width), random(0, canvas.height)
+        );
+        ctx.lineWidth = random(2, 6);
+        ctx.strokeStyle = randomPastelColor();
+        ctx.stroke();
+      }
+    }
+
+    // Asignar el evento al botón para generar una nueva imagen al hacer clic.
+    document.getElementById('generateBtn').addEventListener('click', generatePsychedelicImage);
+
+    // Generar una imagen inicial al cargar la página
+    window.onload = generatePsychedelicImage;
+  </script>
+</body>
+</html>

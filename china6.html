@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Universo TEM Vivo</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      cursor: none;
+    }
+    #cosmos {
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+    .lupa-cuantica {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      pointer-events: none;
+      overflow: hidden;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 50px rgba(0,0,0,0.9);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="cosmos"></canvas>
+  <canvas id="lupa" class="lupa-cuantica"></canvas>
+  
+  <script>
+    const canvas = document.getElementById("cosmos");
+    const ctx = canvas.getContext("2d");
+    const lupa = document.getElementById("lupa");
+    const lupaCtx = lupa.getContext("2d");
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    
+    // Parámetros para los átomos
+    const ATOMO_RADIO = 5;           // Radio fijo para cada átomo (esfera)
+    const SPACING = ATOMO_RADIO * 2 + 2; // Espacio base entre centros (10 + 2 = 12)
+    const JITTER = 1;                // Máximo desplazamiento aleatorio en cada celda (±1px)
+    
+    // Se calcula cuántas columnas y filas caben en el canvas
+    const cols = Math.floor(width / SPACING);
+    const rows = Math.floor(height / SPACING);
+    const atomos = [];
+    
+    // Se generan los átomos en una cuadrícula con pequeña variación
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+        let baseX = i * SPACING + ATOMO_RADIO;
+        let baseY = j * SPACING + ATOMO_RADIO;
+        let x = baseX + (Math.random() * 2 * JITTER - JITTER);
+        let y = baseY + (Math.random() * 2 * JITTER - JITTER);
+        // Se añaden valores para oscilación (para simular que los átomos están "vivos")
+        let phaseX = Math.random() * 2 * Math.PI;
+        let phaseY = Math.random() * 2 * Math.PI;
+        let amplitude = 0.5; // Amplitud muy pequeña para evitar solapamientos
+        atomos.push({ x, y, phaseX, phaseY, amplitude });
+      }
+    }
+    
+    // Función para dibujar un átomo con un gradiente radial estilo TEM
+    function dibujarAtom(ctx, x, y) {
+      const grad = ctx.createRadialGradient(x, y, ATOMO_RADIO * 0.1, x, y, ATOMO_RADIO);
+      grad.addColorStop(0, "rgba(255,255,255,1)");
+      grad.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(x, y, ATOMO_RADIO, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    let t = 0;
+    // Dibuja el universo: fondo negro y todos los átomos con su pequeño movimiento
+    function dibujarUniverso() {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, width, height);
+      
+      // Cada átomo se dibuja con un desplazamiento oscilatorio
+      for (let atom of atomos) {
+        let offsetX = atom.amplitude * Math.sin(t + atom.phaseX);
+        let offsetY = atom.amplitude * Math.sin(t + atom.phaseY);
+        dibujarAtom(ctx, atom.x + offsetX, atom.y + offsetY);
+      }
+    }
+    
+    // La lupa copia una porción ampliada del canvas principal con un factor de zoom fijo
+    function actualizarLupa() {
+      const factorAumento = 10; // Factor de zoom para la lupa
+      lupaCtx.clearRect(0, 0, lupa.width, lupa.height);
+      
+      // Se define la región origen del canvas principal (centrada en la posición del mouse)
+      const sx = mouseX - (150 / factorAumento);
+      const sy = mouseY - (150 / factorAumento);
+      const sWidth = 300 / factorAumento;
+      const sHeight = 300 / factorAumento;
+      
+      lupaCtx.drawImage(canvas, sx, sy, sWidth, sHeight, 0, 0, 300, 300);
+    }
+    
+    // Seguimiento del mouse para posicionar la lupa
+    let mouseX = width / 2, mouseY = height / 2;
+    document.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      lupa.style.left = mouseX + "px";
+      lupa.style.top = mouseY + "px";
+    });
+    
+    // Bucle de animación
+    function ciclo() {
+      t += 0.02; // Incrementa el tiempo para la oscilación
+      dibujarUniverso();
+      actualizarLupa();
+      requestAnimationFrame(ciclo);
+    }
+    
+    ciclo();
+  </script>
+</body>
+</html>

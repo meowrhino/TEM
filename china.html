@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Universo Holográfico</title>
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  cursor: none;
+  background: #000;
+}
+
+#cosmos {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+.lupa-cuantica {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  pointer-events: none;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+  backdrop-filter: contrast(5) brightness(3);
+  box-shadow: 0 0 50px rgba(0,0,0,0.9);
+}
+</style>
+</head>
+<body>
+<canvas id="cosmos"></canvas>
+<div class="lupa-cuantica" id="lupa"></div>
+
+<script>
+const canvas = document.getElementById('cosmos');
+const ctx = canvas.getContext('2d');
+const lupa = document.getElementById('lupa');
+let width = window.innerWidth;
+let height = window.innerHeight;
+
+canvas.width = width;
+canvas.height = height;
+
+// Configuración cuántica
+const ESTRELLAS = 2000;
+const ATOMOS_POR_ESTRELLA = 50;
+const ESCALA_ATOMICA = 0.03;
+
+class Particula {
+  constructor(x, y, nivel) {
+    this.x = x;
+    this.y = y;
+    this.nivel = nivel;
+    this.atomos = nivel > 0 ? Array.from({length: ATOMOS_POR_ESTRELLA}, 
+      () => new Particula(x + Math.random()*20 -10, y + Math.random()*20 -10, nivel-1)) : [];
+  }
+
+  dibujar(ctx, zoom = 1) {
+    if(this.nivel > 0) {
+      ctx.fillStyle = `rgba(255,255,255,${0.2/this.nivel})`;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 2/(this.nivel*0.7), 0, Math.PI*2);
+      ctx.fill();
+      
+      if(zoom > ESCALA_ATOMICA) {
+        this.atomos.forEach(atom => atom.dibujar(ctx, zoom*1.3));
+      }
+    } else {
+      ctx.fillStyle = `rgba(255,255,255,${0.8})`;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 0.3, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+}
+
+// Crear universo fractal
+const universo = Array.from({length: ESTRELLAS}, () => 
+  new Particula(Math.random()*width, Math.random()*height, 4));
+
+function dibujarUniverso() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, width, width);
+  
+  universo.forEach(estrella => {
+    estrella.dibujar(ctx);
+  });
+}
+
+// Sistema de observación cuántica
+let mouseX = width/2, mouseY = height/2;
+let lupaCtx = lupa.getContext('2d');
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  lupa.style.left = `${mouseX}px`;
+  lupa.style.top = `${mouseY}px`;
+});
+
+function actualizarLupa() {
+  lupa.width = 300;
+  lupa.height = 300;
+  
+  const escala = 10;
+  const dx = mouseX - 150/escala;
+  const dy = mouseY - 150/escala;
+  
+  lupaCtx.save();
+  lupaCtx.translate(150, 150);
+  lupaCtx.scale(escala, escala);
+  lupaCtx.translate(-dx, -dy);
+  
+  lupaCtx.fillStyle = '#000';
+  lupaCtx.fillRect(0, 0, 300, 300);
+  
+  universo.forEach(estrella => {
+    estrella.dibujar(lupaCtx, ESCALA_ATOMICA);
+  });
+  
+  lupaCtx.restore();
+}
+
+function ciclo() {
+  dibujarUniverso();
+  actualizarLupa();
+  requestAnimationFrame(ciclo);
+}
+
+// Iniciar danza cuántica
+ciclo();
+</script>
+</body>
+</html>

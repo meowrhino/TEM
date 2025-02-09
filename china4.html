@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Universo TEM Esencial</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      cursor: none;
+    }
+    #cosmos {
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+    .lupa-cuantica {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      pointer-events: none;
+      overflow: hidden;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 50px rgba(0,0,0,0.9);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="cosmos"></canvas>
+  <canvas id="lupa" class="lupa-cuantica"></canvas>
+  
+  <script>
+    const canvas = document.getElementById('cosmos');
+    const ctx = canvas.getContext('2d');
+    const lupa = document.getElementById('lupa');
+    const lupaCtx = lupa.getContext('2d');
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    
+    // Parámetros para los átomos (esferas esenciales)
+    const NUM_ATOMOS = 3000; // Aumenta esta cantidad para un fondo más lleno
+    const ATOMO_RADIO = 5;   // Todas las esferas tendrán el mismo tamaño
+    
+    // Crear array de átomos con posición aleatoria
+    const atomos = [];
+    for (let i = 0; i < NUM_ATOMOS; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      atomos.push({ x, y });
+    }
+    
+    // Función para dibujar un átomo con gradiente radial estilo TEM
+    function dibujarAtom(ctx, atom) {
+      const gradiente = ctx.createRadialGradient(atom.x, atom.y, ATOMO_RADIO * 0.1, atom.x, atom.y, ATOMO_RADIO);
+      gradiente.addColorStop(0, 'rgba(255,255,255,1)');
+      gradiente.addColorStop(1, 'rgba(255,255,255,0)');
+      
+      ctx.fillStyle = gradiente;
+      ctx.beginPath();
+      ctx.arc(atom.x, atom.y, ATOMO_RADIO, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // Dibuja el universo lleno de átomos
+    function dibujarUniverso() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, width, height);
+      for (const atom of atomos) {
+        dibujarAtom(ctx, atom);
+      }
+    }
+    
+    // La lupa copia una porción del canvas principal con un factor de zoom
+    function actualizarLupa() {
+      const factorAumento = 10; // Factor de aumento para la lupa
+      // Limpiar la lupa
+      lupaCtx.clearRect(0, 0, lupa.width, lupa.height);
+      
+      // Definir la región a copiar del canvas principal
+      const sx = mouseX - (150 / factorAumento);
+      const sy = mouseY - (150 / factorAumento);
+      const sWidth = 300 / factorAumento;
+      const sHeight = 300 / factorAumento;
+      
+      // Dibujar la región copiada en la lupa, ampliada al tamaño completo (300x300)
+      lupaCtx.drawImage(canvas, sx, sy, sWidth, sHeight, 0, 0, 300, 300);
+    }
+    
+    // Seguimiento del mouse para posicionar la lupa
+    let mouseX = width / 2, mouseY = height / 2;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      lupa.style.left = mouseX + 'px';
+      lupa.style.top = mouseY + 'px';
+    });
+    
+    // Bucle de animación
+    function ciclo() {
+      dibujarUniverso();
+      actualizarLupa();
+      requestAnimationFrame(ciclo);
+    }
+    
+    ciclo();
+  </script>
+</body>
+</html>
